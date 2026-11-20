@@ -65,8 +65,13 @@ git commit -m "update isi"
 git push
 ```
 
+atau cukup **klik dua kali `publish.bat`** — skrip itu melakukan ketiga langkah di atas
+(commit otomatis dengan pesan tanggal/jam, lalu push).
+
 Vercel langsung membangun dan merilis sendiri ke https://portofolio-ardent.vercel.app
 (biasanya selesai < 1 menit). Tidak perlu lagi menjalankan `vercel deploy`.
+Penting: menyimpan berkas di VSCode **tidak** otomatis mengunggah apa pun — simpan dulu,
+baru jalankan `publish.bat` atau `git push`.
 
 ### Kalau ingin manual / darurat
 
