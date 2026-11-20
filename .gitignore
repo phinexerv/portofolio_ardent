@@ -1,0 +1,6 @@
+.vercel
+.env*
+.vscode/
+_pratinjau/
+perayaan*.jpg
+live-check.html

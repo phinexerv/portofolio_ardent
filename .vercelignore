@@ -1,0 +1,6 @@
+# Folder/berkas yang tidak ikut diunggah ke Vercel
+_pratinjau/
+.vscode/
+README.md
+.env.local
+perayaan*.jpg
