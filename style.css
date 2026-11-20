@@ -583,7 +583,7 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
   cursor: pointer;
   transition: transform .25s var(--ease), opacity .2s var(--ease);
 }
-.btn-send:hover { transform: translateY(-1px); opacity: .92; }
+.btn-send:hover { opacity: .92; }
 .btn-send span { transition: transform .25s var(--ease); }
 .btn-send:hover span { transform: translate(2px, -2px); }
 
@@ -607,16 +607,169 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 }
 
 /* ---------- animasi masuk ---------- */
-.reveal {
+.js .reveal {
   opacity: 0;
   transform: translateY(14px);
   transition: opacity .7s var(--ease), transform .7s var(--ease);
+  transition-delay: calc(var(--i, 0) * 65ms);
 }
-.reveal.in { opacity: 1; transform: none; }
+.js .reveal.in { opacity: 1; transform: none; }
+
+/* ---------- hero: muncul saat halaman dibuka ---------- */
+.js .hero .display { opacity: 0; }
+.js .hero .display.is-split { opacity: 1; }
+
+.display .line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: .3em;
+  margin-bottom: -.3em;
+}
+.display .line > span { display: block; }
+.display.is-split .line > span {
+  animation: lineUp 1s var(--ease) both;
+  animation-delay: calc(var(--i) * 95ms + 120ms);
+}
+@keyframes lineUp {
+  from { transform: translateY(calc(100% + .3em)); }
+  to { transform: translateY(0); }
+}
+
+.js .hero-copy > .eyebrow,
+.js .hero-copy > .lede,
+.js .hero-copy > .hero-links,
+.js .hero-card {
+  animation: softUp .9s var(--ease) both;
+}
+.js .hero-copy > .eyebrow { animation-delay: .05s; }
+.js .hero-copy > .lede { animation-delay: .5s; }
+.js .hero-copy > .hero-links { animation-delay: .62s; }
+.js .hero-card { animation-delay: .3s; }
+
+@keyframes softUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- strip alat & metode ---------- */
+.ticker {
+  border-block: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 55%, transparent);
+  overflow: hidden;
+}
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker 48s linear infinite;
+}
+.ticker:hover .ticker-track { animation-play-state: paused; }
+.ticker-group {
+  display: flex;
+  align-items: center;
+  gap: 2.2rem;
+  padding: .72rem 2.2rem .72rem 0;
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.ticker-group i {
+  font-style: normal;
+  color: var(--accent);
+  opacity: .7;
+}
+@keyframes ticker {
+  to { transform: translateX(-50%); }
+}
+
+/* ---------- spotlight mengikuti kursor ---------- */
+.spotlight {
+  position: relative;
+  isolation: isolate;
+}
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    280px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--accent) 14%, transparent),
+    transparent 72%
+  );
+  opacity: 0;
+  transition: opacity .4s var(--ease);
+}
+.spotlight:hover::before,
+.spotlight:focus-within::before { opacity: 1; }
+.spotlight > * { position: relative; z-index: 1; }
+
+/* ---------- header saat digulir ---------- */
+.site-header {
+  transition: background-color .35s var(--ease), box-shadow .35s var(--ease);
+}
+.site-header.is-scrolled {
+  background: color-mix(in srgb, var(--paper) 82%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  backdrop-filter: blur(14px) saturate(1.15);
+  box-shadow: 0 16px 36px -32px rgba(27, 26, 22, .85);
+}
+
+/* ---------- parallax foto profil ---------- */
+.portrait img {
+  transform: translate3d(0, var(--py, 0px), 0) scale(1.09);
+}
+
+/* ---------- tombol kirim: magnetik + ripple ---------- */
+.btn-send {
+  position: relative;
+  overflow: hidden;
+  transform: translate(var(--tx, 0px), var(--ty, 0px));
+}
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--accent-ink) 45%, transparent);
+  transform: translate(-50%, -50%) scale(0);
+  animation: ripple .6s var(--ease) forwards;
+}
+@keyframes ripple {
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+  }
+}
+
+/* ---------- transisi ganti tema ---------- */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: .38s;
+  animation-timing-function: var(--ease);
+}
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .reveal { opacity: 1; transform: none; transition: none; }
+  .js .reveal { opacity: 1; transform: none; transition: none; }
+  .js .hero .display,
+  .js .hero-copy > *,
+  .js .hero-card {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+  .display .line { overflow: visible; }
+  .display .line > span { animation: none !important; transform: none !important; }
+  .ticker-track { animation: none; }
+  .ticker { overflow-x: auto; }
+  .spotlight::before { display: none; }
+  .portrait img { transform: none; }
+  .btn-send { transform: none; }
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation: none; }
   * { transition-duration: .01ms !important; }
 }
 

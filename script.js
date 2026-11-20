@@ -1,11 +1,13 @@
 /* ==========================================================
    Portofolio — script.js
-   Bagian: tema, menu mobile, animasi masuk, navigasi aktif,
-   progress scroll, dan tahun di footer.
+   Bagian: tema, menu mobile, animasi masuk (stagger), navigasi
+   aktif, progress scroll, tahun footer, formulir, judul hero,
+   spotlight/magnetik/ripple, header blur & parallax.
    ========================================================== */
 
 const root = document.documentElement;
 const STORAGE_KEY = "portofolio-tema";
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 /* ---------- 1. Tema terang / gelap ---------- */
 // localStorage bisa diblokir (mode privat / file://), jadi dibungkus try/catch
@@ -29,8 +31,18 @@ const themeStore = {
 
 document.getElementById("themeToggle")?.addEventListener("click", () => {
   const next = root.dataset.theme === "dark" ? "light" : "dark";
-  root.dataset.theme = next;
-  themeStore.set(next);
+  const apply = () => {
+    root.dataset.theme = next;
+    themeStore.set(next);
+  };
+  // View Transitions membuat pergantian tema memudar mulus (bila didukung)
+  if (document.startViewTransition && !reduceMotion.matches) {
+    try {
+      document.startViewTransition(apply);
+      return;
+    } catch { /* lanjut tanpa transisi */ }
+  }
+  apply();
 });
 
 /* ---------- 2. Menu mobile ---------- */
@@ -51,6 +63,14 @@ nav?.addEventListener("click", (e) => {
 });
 
 /* ---------- 3. Animasi masuk saat digulir ---------- */
+// Kelompok ber-atribut data-stagger: setiap anak muncul berurutan
+document.querySelectorAll("[data-stagger]").forEach((group) => {
+  [...group.children].forEach((child, i) => {
+    child.classList.add("reveal");
+    child.style.setProperty("--i", Math.min(i, 6));
+  });
+});
+
 const revealItems = document.querySelectorAll(".reveal");
 
 if ("IntersectionObserver" in window) {
@@ -148,3 +168,126 @@ if (contactForm) {
     if (formNote) formNote.textContent = `Aplikasi email Anda dibuka. Jika tidak muncul, kirim langsung ke ${tujuanEmail}.`;
   });
 }
+
+/* ---------- 8. Judul hero: muncul baris per baris ---------- */
+(function splitDisplayLines() {
+  const el = document.querySelector(".hero .display");
+  if (!el) return;
+
+  if (reduceMotion.matches) {
+    el.classList.add("is-split");
+    return;
+  }
+
+  try {
+    const lines = [[]];
+    [...el.childNodes].forEach((node) => {
+      if (node.nodeType === 1 && node.tagName === "BR") lines.push([]);
+      else lines[lines.length - 1].push(node);
+    });
+
+    const frag = document.createDocumentFragment();
+    lines.forEach((nodes, i) => {
+      if (!nodes.length) return;
+      const line = document.createElement("span");
+      line.className = "line";
+      const inner = document.createElement("span");
+      inner.style.setProperty("--i", i);
+      nodes.forEach((node) => inner.appendChild(node.cloneNode(true)));
+      line.appendChild(inner);
+      frag.appendChild(line);
+    });
+
+    el.replaceChildren(frag);
+    el.classList.add("is-split");
+  } catch {
+    // bila gagal, tampilkan judul seperti biasa
+    document.documentElement.classList.remove("js");
+  }
+})();
+
+/* ---------- 9. Spotlight & tombol magnetik (kursor mouse) ---------- */
+const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+
+if (finePointer.matches && !reduceMotion.matches) {
+  document.querySelectorAll(".spotlight").forEach((host) => {
+    host.addEventListener(
+      "pointermove",
+      (event) => {
+        if (event.pointerType !== "mouse") return;
+        const rect = host.getBoundingClientRect();
+        host.style.setProperty("--mx", `${event.clientX - rect.left}px`);
+        host.style.setProperty("--my", `${event.clientY - rect.top}px`);
+      },
+      { passive: true }
+    );
+  });
+
+  document.querySelectorAll(".btn-send").forEach((btn) => {
+    btn.addEventListener("pointermove", (event) => {
+      const rect = btn.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / rect.width - 0.5;
+      const y = (event.clientY - rect.top) / rect.height - 0.5;
+      btn.style.setProperty("--tx", `${(x * 6).toFixed(1)}px`);
+      btn.style.setProperty("--ty", `${(y * 4).toFixed(1)}px`);
+    });
+    btn.addEventListener("pointerleave", () => {
+      btn.style.setProperty("--tx", "0px");
+      btn.style.setProperty("--ty", "0px");
+    });
+  });
+}
+
+/* ---------- 10. Ripple saat tombol kirim diklik ---------- */
+document.querySelectorAll(".btn-send").forEach((btn) => {
+  btn.addEventListener("click", (event) => {
+    if (reduceMotion.matches) return;
+    const rect = btn.getBoundingClientRect();
+    const x = event.clientX || rect.left + rect.width / 2;
+    const y = event.clientY || rect.top + rect.height / 2;
+    const size =
+      Math.hypot(
+        Math.max(x - rect.left, rect.right - x),
+        Math.max(y - rect.top, rect.bottom - y)
+      ) * 2;
+
+    const wave = document.createElement("span");
+    wave.className = "ripple";
+    wave.style.width = `${size}px`;
+    wave.style.height = `${size}px`;
+    wave.style.left = `${x - rect.left}px`;
+    wave.style.top = `${y - rect.top}px`;
+    btn.appendChild(wave);
+    wave.addEventListener("animationend", () => wave.remove());
+  });
+});
+
+/* ---------- 11. Header blur & parallax foto ---------- */
+const siteHeader = document.querySelector(".site-header");
+const portraitImg = document.querySelector(".portrait img");
+let scrollFrame = 0;
+
+function onScrollFrame() {
+  scrollFrame = 0;
+
+  if (siteHeader) {
+    siteHeader.classList.toggle("is-scrolled", window.scrollY > 6);
+  }
+
+  if (portraitImg && !reduceMotion.matches) {
+    const box = portraitImg.parentElement.getBoundingClientRect();
+    if (box.bottom > -60 && box.top < window.innerHeight + 60) {
+      const offset =
+        (box.top + box.height / 2 - window.innerHeight / 2) / window.innerHeight;
+      portraitImg.style.setProperty("--py", `${(offset * -16).toFixed(1)}px`);
+    }
+  }
+}
+
+function requestScrollFrame() {
+  if (!scrollFrame) scrollFrame = requestAnimationFrame(onScrollFrame);
+}
+
+window.addEventListener("scroll", requestScrollFrame, { passive: true });
+window.addEventListener("resize", requestScrollFrame);
+requestScrollFrame();

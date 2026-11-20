@@ -52,6 +52,26 @@ Semua ada di blok `:root` paling atas `style.css`:
 
 Tema gelap memakai variabel yang sama di `html[data-theme="dark"]`.
 
+## Efek interaksi
+
+Semua efek ditulis dengan CSS + JavaScript murni (tanpa library) dan otomatis
+dimatikan bila pengunjung mengaktifkan *reduce motion* di sistemnya.
+
+| Efek | Di mana |
+|---|---|
+| Judul hero muncul baris per baris | `.hero .display` (dibelah otomatis oleh `script.js` no. 8) |
+| Reveal berurutan saat digulir | atribut `data-stagger` di `index.html` |
+| Spotlight mengikuti kursor | class `.spotlight` (kartu profil, proyek, formulir) |
+| Tombol magnetik + ripple | tombol "Kirim pesan" |
+| Header blur saat digulir | class `.is-scrolled` pada `.site-header` |
+| Parallax halus pada foto | `.portrait img` |
+| Strip alat & metode berjalan | `.ticker` (dua `.ticker-group` identik untuk loop mulus) |
+| Transisi halus ganti tema | View Transitions API (fallback: ganti langsung) |
+
+Semua pengaturan gerak ada di blok "animasi masuk" sampai "transisi ganti tema"
+pada `style.css`. Untuk mematikan satu efek, cukup hapus class/atributnya di
+`index.html` — CSS dan JS akan mengabaikannya.
+
 ## Publikasi gratis
 
 ### Alur kerja sekarang (otomatis)
