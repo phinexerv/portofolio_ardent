@@ -54,6 +54,27 @@ Tema gelap memakai variabel yang sama di `html[data-theme="dark"]`.
 
 ## Publikasi gratis
 
+### Alur kerja sekarang (otomatis)
+
+Folder ini sudah terhubung ke repo GitHub `phinexerv/portofolio_ardent` dan ke project
+Vercel `portofolio-ardent` (Production Branch: `main`). Jadi setiap kali isi diubah:
+
+```
+git add -A
+git commit -m "update isi"
+git push
+```
+
+Vercel langsung membangun dan merilis sendiri ke https://portofolio-ardent.vercel.app
+(biasanya selesai < 1 menit). Tidak perlu lagi menjalankan `vercel deploy`.
+
+### Kalau ingin manual / darurat
+
+- Klik dua kali `deploy.bat`, atau
+- dari folder ini: `vercel deploy --prod`
+
+Keduanya tetap sah dan langsung merilis tanpa lewat Git.
+
 - **Vercel** (dipakai saat ini): dari folder ini jalankan `vercel deploy --prod`,
   atau cukup **klik dua kali `deploy.bat`** (paling mudah, tanpa buka terminal).
   Situs tayang di https://portofolio-ardent.vercel.app
